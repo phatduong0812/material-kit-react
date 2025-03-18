@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -9,11 +9,14 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { _users } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+
+import { ServiceForm } from 'src/sections/form/service-form';
+
+import dataApi from 'src/api/serviceApi';
 
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
@@ -26,13 +29,40 @@ import type { UserProps } from '../user-table-row';
 
 // ----------------------------------------------------------------------
 
-export function UserView() {
+type UserViewProps = {
+  tableName: string;
+}
+
+export function UserView({ tableName }: UserViewProps) {
   const table = useTable();
+  const [services, setServices] = useState<UserProps[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+          const data = await dataApi.getServiceList(tableName);
+          setServices(data);
+      } catch (err) {
+          console.error('Error fetching services:', err);
+      }
+    };
+
+    fetchData();
+  }, [tableName]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const [filterName, setFilterName] = useState('');
 
   const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
+    inputData: services,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
@@ -43,14 +73,15 @@ export function UserView() {
     <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Users
+          {tableName}
         </Typography>
         <Button
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={handleOpenModal}
         >
-          New user
+          New {tableName}
         </Button>
       </Box>
 
@@ -62,6 +93,7 @@ export function UserView() {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
+          tableName={tableName}
         />
 
         <Scrollbar>
@@ -70,20 +102,22 @@ export function UserView() {
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={services.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    services.map((user) => user.id)
                   )
                 }
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
+                  { id: 'price', label: 'Price' },
+                  ...(tableName === 'Services' ? [{ id: 'category', label: 'Category' }] : []),
+                  { id: 'time', label: 'Time' },
+                  { id: 'clickCount', label: 'Click Count' },
+                  { id: 'lastUpdated', label: 'Last Updated' },
                   { id: 'status', label: 'Status' },
                   { id: '' },
                 ]}
@@ -105,7 +139,7 @@ export function UserView() {
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, services.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -117,13 +151,15 @@ export function UserView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={services.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
+          labelDisplayedRows={({ count, page }) => `Page ${page + 1} of ${Math.ceil(count / table.rowsPerPage)}`}
         />
       </Card>
+      <ServiceForm isOpen={isModalOpen} onClose={handleCloseModal} />
     </DashboardContent>
   );
 }
@@ -133,7 +169,7 @@ export function UserView() {
 export function useTable() {
   const [page, setPage] = useState(0);
   const [orderBy, setOrderBy] = useState('name');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [selected, setSelected] = useState<string[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
 

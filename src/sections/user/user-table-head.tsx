@@ -30,8 +30,8 @@ export function UserTableHead({
 }: UserTableHeadProps) {
   return (
     <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
+      <TableRow className='border-table'>
+        <TableCell padding="checkbox" className='border-table'>
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
@@ -41,12 +41,12 @@ export function UserTableHead({
           />
         </TableCell>
 
-        {headLabel.map((headCell) => (
+        {headLabel.map((headCell, index) => (
           <TableCell
             key={headCell.id}
             align={headCell.align || 'left'}
             sortDirection={orderBy === headCell.id ? order : false}
-            sx={{ width: headCell.width, minWidth: headCell.minWidth }}
+            sx={{ width: headCell.width, minWidth: headCell.minWidth, border: index < headLabel.length - 2 ? '1px solid #e9ecee' : 'none', }}
           >
             <TableSortLabel
               hideSortIcon

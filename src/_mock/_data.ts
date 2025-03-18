@@ -1,3 +1,4 @@
+import { getRandomValues } from 'crypto';
 import {
   _id,
   _price,
@@ -24,23 +25,11 @@ export const _myAccount = {
 export const _users = [...Array(24)].map((_, index) => ({
   id: _id(index),
   name: _fullName(index),
-  company: _company(index),
-  isVerified: _boolean(index),
-  avatarUrl: `/assets/images/avatar/avatar-${index + 1}.webp`,
+  price: String(100),
+  category: _company(index),
+  clickCount: Math.floor(Math.random() * (1000 - 1 + 1)) + 1,
   status: index % 4 ? 'active' : 'banned',
-  role:
-    [
-      'Leader',
-      'Hr Manager',
-      'UI Designer',
-      'UX Designer',
-      'UI/UX Designer',
-      'Project Manager',
-      'Backend Developer',
-      'Full Stack Designer',
-      'Front End Developer',
-      'Full Stack Developer',
-    ][index] || 'UI Designer',
+  lastUpdated: _times(index),
 }));
 
 // ----------------------------------------------------------------------

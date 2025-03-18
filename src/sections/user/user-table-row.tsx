@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -15,14 +14,22 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
+export type PageInfo = {
+  page: number;
+  perPage: number;
+  totalPages: number;
+  totalItems: number;
+}
+
 export type UserProps = {
   id: string;
   name: string;
-  role: string;
+  price: string;
+  category: string;
+  clickCount: number;
   status: string;
-  company: string;
-  avatarUrl: string;
-  isVerified: boolean;
+  lastUpdated: string;
+  time: number;
 };
 
 type UserTableRowProps = {
@@ -44,35 +51,41 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
   return (
     <>
-      <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
-        <TableCell padding="checkbox">
+      <TableRow hover tabIndex={-1} role="checkbox" className='border-table' selected={selected}>
+        <TableCell padding="checkbox" className='border-table'>
           <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
         </TableCell>
 
-        <TableCell component="th" scope="row">
-          <Box gap={2} display="flex" alignItems="center">
-            <Avatar alt={row.name} src={row.avatarUrl} />
+        <TableCell component="th" scope="row" className='border-table'>
+          <Box gap={1} display="flex" alignItems="center">
             {row.name}
           </Box>
         </TableCell>
 
-        <TableCell>{row.company}</TableCell>
+        <TableCell className='border-table'>{row.price}€</TableCell>
 
-        <TableCell>{row.role}</TableCell>
+        {
+          row.category !== undefined &&
+            <TableCell>{row.category}</TableCell>
+        }
 
-        <TableCell align="center">
-          {row.isVerified ? (
-            <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
-          ) : (
-            '-'
-          )}
-        </TableCell>
+        <TableCell className='border-table'>{row.time} min</TableCell>
+
+        <TableCell className='border-table'>{row.clickCount}</TableCell>
+
+        <TableCell className='border-table'>{row.lastUpdated}</TableCell>
 
         <TableCell>
-          <Label color={(row.status === 'banned' && 'error') || 'success'}>{row.status}</Label>
+          <Label
+            color={
+              row.status === 'archived' ? 'error' : row.status === 'draft' ? 'default' : 'success'
+            }
+          >
+            {row.status}
+          </Label>
         </TableCell>
 
-        <TableCell align="right">
+        <TableCell align="right" >
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>

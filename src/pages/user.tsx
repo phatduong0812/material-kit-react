@@ -6,14 +6,14 @@ import { UserView } from 'src/sections/user/view';
 
 // ----------------------------------------------------------------------
 
-export default function Page() {
+export default function Page({ tableName }: any) {
   return (
     <>
       <Helmet>
-        <title> {`Users - ${CONFIG.appName}`}</title>
+        <title> {`${tableName} - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <UserView />
+      <UserView tableName={tableName} />
     </>
   );
 }
